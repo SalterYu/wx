@@ -347,6 +347,18 @@ if($data->{"MsgType"}=="event"){
             while ($row = $sqlResultTeacherNum -> fetch_assoc()) {
                 $techNumber = $row["techNumber"];
             }
+
+            $nowTime = "11:30";
+            $week = 3;
+            //获取当前时间的几点几分对应的课程信息
+            $sqlGetLessonInfo = "select * from lesson where '".$nowTime."' BETWEEN lessonStart and lessonStop and week =". $week." and techNumber = ".$techNumber;
+            $sqlResultGeLessonInfo = $sqlconn->excudSqlString($sqlGetLessonInfo,WeiXinCheck::MSG_DATABASE);
+            //$weixin->replyText($sqlGetLessonInfo);
+            if($sqlResultGeLessonInfo->num_rows == 0){ $weixin->replyText("当前没有课程信息");}
+            while ($row = $sqlResultGeLessonInfo -> fetch_assoc()) {
+                $lessonName = $row["lessonName"];
+                $lessonRoom = $row["lessonRoom"];
+            }
             $scene_id=$techNumber+time();//可以进行一些加密比如增加值或减少
             $result = $network->getTicketObject($scene_id);
             $result_ticket = $result->ticket;
@@ -359,17 +371,6 @@ if($data->{"MsgType"}=="event"){
             //获取当前时间几点几分
             $nowTime = date("H:i",$scene_id-$techNumber);
             
-            //$nowTime = "11:30";
-            //$week = 3;
-            //获取当前时间的几点几分对应的课程信息
-            $sqlGetLessonInfo = "select * from lesson where '".$nowTime."' BETWEEN lessonStart and lessonStop and week =". $week." and techNumber = ".$techNumber;
-            $sqlResultGeLessonInfo = $sqlconn->excudSqlString($sqlGetLessonInfo,WeiXinCheck::MSG_DATABASE);
-            //$weixin->replyText($sqlGetLessonInfo);
-            if($sqlResultGeLessonInfo->num_rows == 0){ $weixin->replyText("当前没有课程信息");}
-            while ($row = $sqlResultGeLessonInfo -> fetch_assoc()) {
-                $lessonName = $row["lessonName"];
-                $lessonRoom = $row["lessonRoom"];
-            }
             //$weixin->replyText($lessonName);
             //var_dump($signStart);
             //签到表数据库指令
@@ -511,7 +512,7 @@ if($data->{"MsgType"}=="event"){
             //但是一般性二维码有效期一过这个二维码也是失效了，所以定死十分钟有效期
             if(($scene_id - $teacherNum + 6000)>time())
             {
-                $fromUserName = 0;
+                //$fromUserName = 0;
                 $sqlGetstudentNumString = "SELECT * from student where stuOpenId = '" .$fromUserName."'";
                 //$weixin->replyText($sqlGetstudentNumString);
                 $sqlResultstudentNum = $sqlconn->excudSqlString($sqlGetstudentNumString,WeiXinCheck::MSG_DATABASE);

@@ -7,6 +7,8 @@ if(!isset($_POST['openid']))
    echo "403 forbidden";
    exit;
 }
+
+
 if(($_POST['type'])=='addlesson'){
     if(($_POST['lessonName'])&&($_POST['lessonClass'])&&($_POST['lessonStart'])&&($_POST['lessonStop'])&&($_POST['techNumber'])&&($_POST['week']))
     {
@@ -22,6 +24,7 @@ if(($_POST['type'])=='addlesson'){
         echo "您输入的信息有误，或者服务器延迟";
     }
 }
+
 if(($_POST['type'])=='select'&&(!empty($_POST['lessonName']))&&(!empty($_POST['class']))){
     $sqlconn = new SqlFunction();
 
@@ -37,7 +40,7 @@ if(($_POST['type'])=='select'&&(!empty($_POST['lessonName']))&&(!empty($_POST['c
             $scene_id[$x] = $row["scene_id"];
             $x = $x + 1;
         }
-    }else
+    }else 
     {
         $result = array(
         'statue'=>0 ,
@@ -45,6 +48,7 @@ if(($_POST['type'])=='select'&&(!empty($_POST['lessonName']))&&(!empty($_POST['c
         );
         echo json_encode($result);die;
     }
+    //echo $_POST['time'];die;
     for($y = 0;$y < $x ; $y++){
         if(date("Y-m-d",$scene_id[$y]) == $_POST['time'])
             break;
@@ -98,6 +102,55 @@ if(($_POST['type'])=='select'&&(!empty($_POST['lessonName']))&&(!empty($_POST['c
         'i'=>$i
         );
     echo json_encode($result);die;
+
+}
+
+
+if(($_POST['type'])=='statistics'&&(!empty($_POST['lessonName']))&&(!empty($_POST['class']))){
+    $lesson = $_POST['lessonName'];
+    $class = $_POST['class'];
+    $sqlconn = new SqlFunction();
+    $sqlGetSignFail = 'SELECT
+                stuName,stuNum,stuClass,lesson,
+                COUNT(*) AS count
+              FROM
+                signfail
+              WHERE 
+                lesson = "'.$lesson.'" AND stuClass = '.$class.'
+              GROUP BY
+                stuNum
+              ORDER BY
+                COUNT(*) DESC';
+    //echo $sqlGetSignFail;die;
+    $sqlResult=$sqlconn->excudSqlString($sqlGetSignFail,"use signindb");
+
+    if($sqlResult->num_rows == 0){ 
+         $result = array(
+        'statue'=>0 ,
+        'message'=>"未获取数据"
+        );
+        echo json_encode($result);die;
+    }
+    $i = 0;
+    while ($row = $sqlResult -> fetch_assoc()) {
+        $stuNum[$i] = $row['stuNum'];
+        $stuName[$i] = $row['stuName'];
+        $stuClass[$i] = $row['stuClass'];
+        $stuCount[$i] = $row['count'];
+        $i = $i + 1;
+    }
+    $result = array(
+        'statue'=>1,
+        'data'=>array(
+            'stuNum'=>$stuNum,
+            'stuName'=>$stuName,
+            'stuClass'=>$stuClass,
+            'lesson'=>$lesson,
+            'stuCount'=>$stuCount,
+            'i'=>$i
+            ),
+        );
+    echo json_encode($result);die;
 }
 else{
     $result = array(
@@ -106,6 +159,7 @@ else{
         );
     echo json_encode($result);
 }
+
 function addLesson($lessonName='',$lessonClass='',$lessonStart='',$lessonStop='',$techNumber='',$week=''){
     //数据库处理
     $sqlconn = new SqlFunction();

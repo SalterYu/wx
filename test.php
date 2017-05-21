@@ -1,5 +1,5 @@
 <?php
-    require("SqlFunction.php");
+    require("./server/SqlFunction.php");
 
 //获取openid
 

@@ -283,52 +283,9 @@ session_destroy();die;*/
 <html>
 <head>
   <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-<style>
-  <style>
-    .text-center {
-    text-align: center !important;
-        padding-top: 50px;
-}
-.border-0 {
-    border: 0 !important;
-}
-.btn-large {
-    padding: 0.75em 1.25em;
-    font-size: inherit;
-    border-radius: 6px;
-}
-.btn-primary1 {
-    color: #fff;
-    background-color: #28a745;
-    background-image: -webkit-linear-gradient(270deg, #34d058 0%, #28a745 90%);
-    background-image: linear-gradient(-180deg, #34d058 0%, #28a745 90%);
-}
 
-.btn {
-    position: relative;
-    display: inline-block;
-    padding: 6px 12px;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 20px;
-    white-space: nowrap;
-    vertical-align: middle;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    background-repeat: repeat-x;
-    background-position: -1px -1px;
-    background-size: 110% 110%;
-    border: 1px solid rgba(27,31,35,0.2);
-    border-radius: 0.25em;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-}
 </style>
-</style>
+<link rel="stylesheet" href="../css/site.css" crossorigin="anonymous">
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.css" crossorigin="anonymous">
 <script src="../js/jquery.js" crossorigin="anonymous"></script>
 <script src="../js/sortTable.js" crossorigin="anonymous"></script>
@@ -360,12 +317,7 @@ var time = $('#time').val();
                 return;
               }
               return;
-              if(result==1){
-                  alert("绑定完成，请去主界面添加您的课程信息"); 
-                   //做个重定向,用来录入老师的课程 
-              }
-              else
-                  alert(result)
+
           }  
       });
 }
@@ -456,6 +408,7 @@ function createTable(obj){
 <div class="form-group ">
     <div class="d-sm-none text-center">
             <span type="button" class="btn btn-primary1 btn-large border-0" rel="nofollow" onclick="sub()">Select</span>
+    </div>
     </div>
 </form>
 <div id="table" style="padding-left: 30px;">

@@ -214,30 +214,21 @@ $openid = $code_access_token['openid'];
 $token =$code_access_token['token'];
 $refreshToken = $code_access_token['refreshToken'];
 //$openid = 1;
-$sqlGetInfo = "SELECT * FROM teacher where techOpenId='".$openid."'";
+$sqlGetTeacherInfo = "SELECT * FROM teacher where techOpenId='".$openid."'";
 $sqlconn = new SqlFunction();
-$sqlResultGetInfo = $sqlconn->excudSqlString($sqlGetInfo,"use signindb");
-if($sqlResultGetInfo->num_rows == 0){ echo "<h1 style='color:red'>身份信息错误</h1>";die;}
+$sqlResultGetTeacherInfo = $sqlconn->excudSqlString($sqlGetTeacherInfo,"use signindb");
+if($sqlResultGetTeacherInfo->num_rows == 0){ echo "<h1 style='color:red'>身份信息错误</h1>";die;}
+while ($row = $sqlResultGetTeacherInfo -> fetch_assoc()) {
+    $techNumber = $row["techNumber"];
+    $techName = $row["techName"];
+}
 
-$sqlFail = 'SELECT
-                stuName,stuNum,stuClass,
-                COUNT(*) AS count
-              FROM
-                signfail
-              GROUP BY
-                stuNum
-              ORDER BY
-                COUNT(*) DESC';
-
-$sqlResult = $sqlconn->excudSqlString($sqlFail,"use signindb");
-if($sqlResult->num_rows == 0){ echo "<h1>未获取到数据</h1>" ;}
-$i = 0;
-while ($row = $sqlResult -> fetch_assoc()) {
-    $stuNum[$i] = $row['stuNum'];
-    $stuName[$i] = $row['stuName'];
-    $stuClass[$i] = $row['stuClass'];
-    $stuCount[$i] = $row['count'];
-    $i = $i + 1;
+$sqlSelectLesson = "select * from lesson ";
+$sqlResultSelectLesson = $sqlconn->excudSqlString($sqlSelectLesson,CodeAccessToken::MSG_DATABASE);
+$l=0;
+while($row=$sqlResultSelectLesson->fetch_assoc()){
+  $lessonName[$l] = $row['lessonName'];
+  $l = $l + 1;
 }
 
 ?>
@@ -245,67 +236,142 @@ while ($row = $sqlResult -> fetch_assoc()) {
 <html>
 <head>
   <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-
+<link rel="stylesheet" href="../css/site.css" crossorigin="anonymous">
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.css" crossorigin="anonymous">
 <script src="../js/jquery.js" crossorigin="anonymous"></script>
+<script src="../js/sortTable.js" crossorigin="anonymous"></script>
 <script src="../bootstrap/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
 </head>
 <body class="bg-success">
-<h1 style="color: red">需要警惕的前三位学生</h1>
-<table class="table table-striped table-condensed">
+<form class="form-horizontal" style="padding-top: 50px">
+<div class="form-group">
+    <label  class="col-sm-3 control-label" style="font-size: 36px;color: grey">请输入课程:</label>
+    <div class="col-sm-9">
+     <select id="select" class="form-control" style="font-size: 30px;min-height: 50px;">
+      <?php for ($lesson=0; $lesson < $l; $lesson++) { 
+        echo "<option>".$lessonName[$lesson]."</option>";
+      }
+      ?>
+    </select>
+    </div>
+</div>
+<div>
+  <?php 
+  $c = "<script>alert(obj);</script>";
+  ?>
+</div>
+<br />
+<div class="form-group ">
+     <label  class="col-sm-3 control-label" style="font-size: 36px;color: grey;text-align: center;">班级:</label>
+     <div class="col-sm-9">
+     <input id="class" type="text" class="form-control" style="font-size: 30px;min-height: 50px;" placeholder="请输入班级">
+    </div>
+</div>
+<br />
+
+<div class="form-group ">
+    <div class="d-sm-none text-center">
+            <span type="button" class="btn btn-primary1 btn-large border-0" rel="nofollow" onclick="statistics()">统计</span>
+    </div>
+</div>
+</form>
+<h1 style="color: red">学生信息统计</h1>
+<table class="table table-striped table-condensed" id="selectTable">
       <thead>
         <tr>
-          <th><h1>#</h1></th>
-          <th><h1>学生学号</h1></th>
-          <th><h1>学生姓名</h1></th>
-          <th><h1>班级</h1></th>
-          <th><h1>缺勤</h1></th>
+          <th onclick = "$.sortTable.sort('selectTable',0)"><h1>#</h1></th>
+          <th onclick = "$.sortTable.sort('selectTable',1)"><h1>学生学号</h1></th>
+          <th onclick = "$.sortTable.sort('selectTable',2)"><h1>学生姓名</h1></th>
+          <th onclick = "$.sortTable.sort('selectTable',3)"><h1>班级</h1></th>
+          <th onclick = "$.sortTable.sort('selectTable',4)"><h1>课程</h1></th>
+          <th onclick = "$.sortTable.sort('selectTable',5)"><h1>缺勤</h1></th>
         </tr>
       </thead>
       <tbody>
-      <?php 
-      for($count=0;$count<3;$count++){
-          echo '<tr>';
-          echo "<th scope='row'><h1>";
-          echo  $count+1;
-          echo "</h1></th>";
-          echo '<td><h1>'.$stuNum[$count].'</h1></td>';
-          echo '<td><h1>'.$stuName[$count].'</h1></td>';
-          echo '<td><h1>'.$stuClass[$count].'</h1></td>';
-          echo '<td><h1>'.$stuCount[$count].'</h1></td>';
-          echo '</tr>';
-      }
-        ?>
+
      </tbody>
 </table>
 <br/>
-<h1 style="color: red">其他缺勤的学生统计</h1>
-<table class="table table-striped table-condensed">
-      <thead>
-        <tr>
-          <th><h1>#</h1></th>
-          <th><h1>学生学号</h1></th>
-          <th><h1>学生姓名</h1></th>
-          <th><h1>班级</h1></th>
-          <th><h1>缺勤</h1></th>
-        </tr>
-      </thead>
-      <tbody>
-      <?php 
-      for($count=3;$count<$i;$count++){
-          echo '<tr>';
-          echo "<th scope='row'><h1>";
-          echo  $count+1;
-          echo "</h1></th>";
-          echo '<td><h1>'.$stuNum[$count].'</h1></td>';
-          echo '<td><h1>'.$stuName[$count].'</h1></td>';
-          echo '<td><h1>'.$stuClass[$count].'</h1></td>';
-          echo '<td><h1>'.$stuCount[$count].'</h1></td>';
-          echo '</tr>';
+
+<script type="text/javascript">
+function statistics() { 
+var lessonName = $("#select").val();
+var clas = $("#class").val();
+  $.ajax({  
+          url:"../server/lesson_server.php",           //the page containing php script  
+          type: "POST",               //request type  
+          data:{
+            'openid':"<?php echo $openid ?>",
+            'type':'statistics',
+            'lessonName':lessonName,
+            'class':clas,
+        },  
+          success:function(result){  
+              var obj = JSON.parse(result)
+              if(obj.statue==1){
+                console.log(obj.data);
+                createTable(obj.data);
+              }
+              if(obj.statue==0){
+                alert (obj.message)
+                return;
+              }
+              return;
+
+          }  
+      });
+}
+function deleteTable(){
+  var table = document.getElementById('selectTable')
+  var tbody = document.getElementsByTagName("tbody")
+  if(tbody.length == 0) return
+  table.removeChild(tbody[0])
+}
+
+
+
+function createTable(obj){ 
+      deleteTable()
+      var parNode = document.getElementById("selectTable"); //定位到table上
+      var tbody = document.createElement("tbody"); //新建一个tbody类型的Element节
+      var tr = new Array();
+      var j=0
+      for(var i=0;i<=obj.i-1;i++){
+          tr[i] = document.createElement("tr"); //新建一个tr类型的Element节点
+              td1 = document.createElement("td"); //新建一个td类型的Element节点
+              td2 =  document.createElement("td");
+              td3 =  document.createElement("td");
+              td4 =  document.createElement("td");
+              td5 =  document.createElement("td");
+              td6 =  document.createElement("td");
+
+              h1 = document.createElement("h1")
+              h1.innerHTML = j + 1 
+              td1.appendChild(h1)
+              tr[i].appendChild(td1); 
+
+              td2.innerHTML = '<h1>' + obj['stuNum'][j] + '</h1>'
+              tr[i].appendChild(td2); 
+
+              td3.innerHTML = '<h1>' + obj['stuName'][j] + '</h1>'
+              tr[i].appendChild(td3); 
+
+              td4.innerHTML = '<h1>' + obj['stuClass'][j] + '</h1>' 
+              tr[i].appendChild(td4); 
+
+              td5.innerHTML = '<h1>' + obj['lesson'] + '</h1>'
+              tr[i].appendChild(td5); 
+
+              td6.innerHTML = '<h1>' + obj['stuCount'][j] + '</h1>'
+              tr[i].appendChild(td6); 
+
+              j = j +1
+
+           tbody.appendChild(tr[i])
       }
-        ?>
-      </tbody>
-    </table>
+      parNode.appendChild(tbody);
+ } 
+</script>
 </body>
 </html>
